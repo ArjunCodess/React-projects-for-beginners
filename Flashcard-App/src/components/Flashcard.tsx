@@ -38,7 +38,7 @@ export default function Flashcard({ flashcard, onCorrectAnswer, onWrongAnswer, o
   }
 
   return (
-    <div className="max-w-xl mx-auto">
+    <div className="max-w-[40rem] mx-auto">
       <div 
         className="w-full h-[200px] bg-transparent cursor-pointer group perspective"
       >
