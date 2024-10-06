@@ -10,6 +10,7 @@ interface Flashcard {
   id: string;
   question: string;
   answer: string;
+  folder: string;
 }
 
 function NavLink({ to, children }: { to: string; children: React.ReactNode }) {
@@ -46,6 +47,8 @@ export default function App() {
     setFlashcards(updatedFlashcards);
     localStorage.setItem('flashcards', JSON.stringify(updatedFlashcards));
   };
+
+  const existingFolders = Array.from(new Set(flashcards.map(card => card.folder)));
 
   const handleCorrectAnswer = () => {
     setScore(score + 1);
@@ -89,7 +92,7 @@ export default function App() {
         <main className="flex-grow container mx-auto px-4 sm:px-6 lg:px-8 py-8 transition-all duration-200 ease-in-out">
           <div className="bg-white dark:bg-gray-800 shadow-sm rounded-lg p-6 md:p-8 transition-all duration-200 ease-in-out">
             <Routes>
-              <Route path="/" element={<FlashcardForm onAddFlashcard={addFlashcard} />} />
+              <Route path="/" element={<FlashcardForm onAddFlashcard={addFlashcard} existingFolders={existingFolders} />} />
               <Route path="/list" element={<FlashcardListPage flashcards={flashcards} />} />
               <Route path="/test" element={
                 <TestingPage 

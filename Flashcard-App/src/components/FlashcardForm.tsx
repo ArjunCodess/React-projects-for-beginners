@@ -1,21 +1,34 @@
 "use client"
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 interface FlashcardFormProps {
-  onAddFlashcard: (card: { question: string; answer: string }) => void
+  onAddFlashcard: (card: { question: string; answer: string; folder: string }) => void;
+  existingFolders: string[];
 }
 
-export default function FlashcardForm({ onAddFlashcard }: FlashcardFormProps) {
+export default function FlashcardForm({ onAddFlashcard, existingFolders }: FlashcardFormProps) {
   const [question, setQuestion] = useState('')
   const [answer, setAnswer] = useState('')
+  const [folder, setFolder] = useState('')
+  const [newFolder, setNewFolder] = useState('')
+  const [isNewFolder, setIsNewFolder] = useState(existingFolders.length === 0)
+
+  useEffect(() => {
+    if (existingFolders.length > 0 && !isNewFolder) {
+      setFolder(existingFolders[0])
+    }
+  }, [existingFolders])
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    if (question.trim() && answer.trim()) {
-      onAddFlashcard({ question: question.trim(), answer: answer.trim() })
+    const selectedFolder = isNewFolder ? newFolder : folder
+    if (question.trim() && answer.trim() && selectedFolder.trim()) {
+      onAddFlashcard({ question: question.trim(), answer: answer.trim(), folder: selectedFolder.trim() })
       setQuestion('')
       setAnswer('')
+      setNewFolder('')
+      setIsNewFolder(false)
     }
   }
 
@@ -28,6 +41,50 @@ export default function FlashcardForm({ onAddFlashcard }: FlashcardFormProps) {
         </p>
       </div>
       <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="space-y-2">
+          <label htmlFor="folder" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+            Folder
+          </label>
+          {existingFolders.length === 0 ? (
+            <input
+              type="text"
+              placeholder="Enter folder name"
+              value={newFolder}
+              onChange={(e) => setNewFolder(e.target.value)}
+              className="flex-grow h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+            />
+          ) : (
+            <div className="flex space-x-2">
+              <select
+                id="folder"
+                value={isNewFolder ? 'new' : folder}
+                onChange={(e) => {
+                  if (e.target.value === 'new') {
+                    setIsNewFolder(true)
+                  } else {
+                    setIsNewFolder(false)
+                    setFolder(e.target.value)
+                  }
+                }}
+                className="flex-grow h-10 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {existingFolders.map((f) => (
+                  <option key={f} value={f}>{f}</option>
+                ))}
+                <option value="new">Create new folder</option>
+              </select>
+              {isNewFolder && (
+                <input
+                  type="text"
+                  placeholder="New folder name"
+                  value={newFolder}
+                  onChange={(e) => setNewFolder(e.target.value)}
+                  className="flex-grow h-10 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                />
+              )}
+            </div>
+          )}
+        </div>
         <div className="space-y-2">
           <label htmlFor="question" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
             Question
